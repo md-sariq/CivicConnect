@@ -12,7 +12,9 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors(origin:"https://civic-connect-o91wr8b0c-sariqs-projects.vercel.app/login",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+   credentials: true,));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
