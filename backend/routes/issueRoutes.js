@@ -24,12 +24,69 @@
 // module.exports = router;
 
 
+// const express = require('express');
+// const router = express.Router();
+// const multer = require('multer');
+// const path = require('path');
+// // UPDATED: Import 'authorityAdmin' instead of the old 'admin'
+// const { protect, authorityAdmin } = require('../middleware/authMiddleware'); 
+// const {
+//   createIssue,
+//   getAllIssues,
+//   getIssueById,
+//   updateIssueStatus,
+//   getNearbyIssues,
+//   upvoteIssue,
+//   getMyIssues,
+// } = require('../controllers/issueController');
+
+// // multer setup (no changes here)
+// const storage = multer.diskStorage({
+//   destination(req, file, cb) {
+//     cb(null, 'uploads/');
+//   },
+//   filename(req, file, cb) {
+//     cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+//   },
+// });
+// const upload = multer({ storage });
+
+
+// // --- Define Routes ---
+// router.route('/').post(protect, upload.single('image'), createIssue).get(getAllIssues);
+
+// // IMPORTANT: Specific routes must come BEFORE dynamic routes like /:id
+// router.get('/my-issues', protect, getMyIssues);
+// router.get('/nearby', protect, getNearbyIssues);
+
+// // Dynamic routes
+// router.route('/:id').get(protect, getIssueById);
+// // UPDATED: Use the 'authorityAdmin' middleware to protect this route
+// router.route('/:id/status').put(protect, authorityAdmin, updateIssueStatus);
+// router.route('/:id/upvote').put(protect, upvoteIssue);
+
+
+// module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-// UPDATED: Import 'authorityAdmin' instead of the old 'admin'
-const { protect, authorityAdmin } = require('../middleware/authMiddleware'); 
+const { protect, authorityAdmin } = require('../middleware/authMiddleware');
 const {
   createIssue,
   getAllIssues,
@@ -40,7 +97,7 @@ const {
   getMyIssues,
 } = require('../controllers/issueController');
 
-// multer setup (no changes here)
+// multer setup
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, 'uploads/');
@@ -51,19 +108,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-
 // --- Define Routes ---
-router.route('/').post(protect, upload.single('image'), createIssue).get(getAllIssues);
+router.route('/')
+  .post(protect, upload.single('image'), createIssue)
+  .get(protect, getAllIssues); // <-- protect middleware added here
 
-// IMPORTANT: Specific routes must come BEFORE dynamic routes like /:id
+// Specific routes must come BEFORE dynamic routes like /:id
 router.get('/my-issues', protect, getMyIssues);
 router.get('/nearby', protect, getNearbyIssues);
 
 // Dynamic routes
 router.route('/:id').get(protect, getIssueById);
-// UPDATED: Use the 'authorityAdmin' middleware to protect this route
 router.route('/:id/status').put(protect, authorityAdmin, updateIssueStatus);
 router.route('/:id/upvote').put(protect, upvoteIssue);
-
 
 module.exports = router;
