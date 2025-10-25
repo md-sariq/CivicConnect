@@ -112,8 +112,8 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  // origin: "http://localhost:5173", //local
-  origin: "https://civic-connect-y8dl.vercel.app", // production
+  origin: "http://localhost:5173", //local
+  // origin: "https://civic-connect-y8dl.vercel.app", // production
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true
 }));
