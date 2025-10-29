@@ -221,6 +221,217 @@
 
 
 
+// const asyncHandler = require('express-async-handler');
+// const Issue = require('../models/issueModel');
+// const Authority = require('../models/authorityModel'); // Ensure Authority model is imported
+
+// // @desc    Create a new issue and auto-assign
+// // @route   POST /api/issues
+// // @access  Private
+// const createIssue = asyncHandler(async (req, res) => {
+//   const { title, description, category, lat, lng, address, dateTime } = req.body;
+//   let imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+//   const longitude = parseFloat(lng);
+//   const latitude = parseFloat(lat);
+
+//   if (isNaN(longitude) || isNaN(latitude)) {
+//     // Keep error log for invalid input
+//     console.error('ERROR: Invalid latitude or longitude received from frontend.');
+//     res.status(400);
+//     throw new Error('Invalid location coordinates provided.');
+//   }
+
+//   const location = { type: 'Point', coordinates: [longitude, latitude] };
+
+//   // Auto-Assignment Logic
+//   const responsibleAuthority = await Authority.findOne({
+//     jurisdiction: {
+//       $geoIntersects: { $geometry: location }
+//     }
+//   });
+
+//   if (!responsibleAuthority) {
+//     // Keep error log for assignment failure
+//     console.error(`ERROR: No authority found containing the location point: ${JSON.stringify(location)}`);
+//     res.status(400);
+//     throw new Error('This location is not currently covered by any registered authority.');
+//   }
+
+//   // Create the new Issue document
+//   const issue = new Issue({
+//     title,
+//     description,
+//     category,
+//     imageUrl,
+//     address,
+//     location,
+//     reportedBy: req.user._id,
+//     assignedToAuthority: responsibleAuthority._id,
+//     reportedAt: dateTime ? new Date(dateTime) : new Date(),
+//   });
+
+//   const createdIssue = await issue.save();
+//   res.status(201).json(createdIssue);
+// });
+
+// // @desc    Get all issues (for Super Admin) or filtered issues (for Authority Admin)
+// // @route   GET /api/issues
+// // @access  Private
+// const getAllIssues = asyncHandler(async (req, res) => {
+//   if (!req.user) {
+//     // Keep critical error log
+//     console.error('CRITICAL ERROR: req.user object is MISSING after protect middleware!');
+//     res.status(500);
+//     throw new Error('User authentication data missing.');
+//   }
+
+//   let query = {};
+//   if (req.user.role === 'authorityAdmin') {
+//     if (!req.user.authority) {
+//       // Keep specific error log
+//       console.error(`ERROR: User ${req.user.email} has role 'authorityAdmin' but is missing the 'authority' field linkage!`);
+//       res.status(500);
+//       throw new Error('Authority admin user is not properly linked to an authority.');
+//     }
+//     query = { assignedToAuthority: req.user.authority };
+//   }
+//   // Super Admin gets all issues (query remains {})
+
+//   try {
+//     const issues = await Issue.find(query)
+//       .populate('reportedBy', 'name')
+//       .populate('assignedToAuthority', 'name')
+//       .sort({ createdAt: -1 });
+//     res.json(issues);
+//   } catch (error) {
+//     // Keep database error log
+//     console.error('❌ DATABASE ERROR during Issue.find():', error);
+//     res.status(500);
+//     throw new Error('Failed to retrieve issues from the database.');
+//   }
+// });
+
+// // @desc    Get issues reported by the logged-in user
+// // @route   GET /api/issues/my-issues
+// // @access  Private
+// const getMyIssues = asyncHandler(async (req, res) => {
+//   const issues = await Issue.find({ reportedBy: req.user._id })
+//     .populate('assignedToAuthority', 'name')
+//     .sort({ createdAt: -1 });
+//   res.json(issues);
+// });
+
+// // @desc    Get nearby issues based on user location
+// // @route   GET /api/issues/nearby
+// // @access  Private
+// const getNearbyIssues = asyncHandler(async (req, res) => {
+//   const { lat, lng } = req.query;
+//   const maxDistance = 5000;
+
+//   if (!lat || !lng) {
+//       res.status(400);
+//       throw new Error('Latitude and Longitude query parameters are required.');
+//   }
+
+//   const issues = await Issue.find({
+//     location: {
+//       $near: {
+//         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+//         $maxDistance: maxDistance,
+//       },
+//     },
+//   }).populate('assignedToAuthority', 'name');
+
+//   const issuesWithUpvoteStatus = issues.map(issue => ({
+//     ...issue.toObject(),
+//     isUpvoted: issue.upvotes.includes(req.user._id),
+//   }));
+//   res.json(issuesWithUpvoteStatus);
+// });
+
+// // @desc    Get single issue by ID
+// // @route   GET /api/issues/:id
+// // @access  Private
+// const getIssueById = asyncHandler(async (req, res) => {
+//   const issue = await Issue.findById(req.params.id)
+//     .populate('reportedBy', 'name')
+//     .populate('assignedToAuthority', 'name');
+//   if (issue) {
+//     res.json(issue);
+//   } else {
+//     res.status(404);
+//     throw new Error('Issue not found');
+//   }
+// });
+
+// // @desc    Update issue status
+// // @route   PUT /api/issues/:id/status
+// // @access  Private/AuthorityAdmin
+// const updateIssueStatus = asyncHandler(async (req, res) => {
+//   const { status } = req.body;
+//   const updatedIssue = await Issue.findByIdAndUpdate(
+//     req.params.id,
+//     { status: status },
+//     { new: true, runValidators: true }
+//   );
+//   if (updatedIssue) {
+//     res.json(updatedIssue);
+//   } else {
+//     res.status(404);
+//     throw new Error('Issue not found');
+//   }
+// });
+
+// // @desc    Upvote or remove upvote for an issue
+// // @route   PUT /api/issues/:id/upvote
+// // @access  Private
+// const upvoteIssue = asyncHandler(async (req, res) => {
+//  const issue = await Issue.findById(req.params.id);
+//   if (issue) {
+//     const alreadyUpvoted = issue.upvotes.includes(req.user._id);
+//     if (alreadyUpvoted) {
+//       issue.upvotes.pull(req.user._id);
+//     } else {
+//       issue.upvotes.push(req.user._id);
+//     }
+//     await issue.save();
+//     res.json({
+//         upvotes: issue.upvotes,
+//         isUpvoted: !alreadyUpvoted,
+//     });
+//   } else {
+//     res.status(404);
+//     throw new Error('Issue not found');
+//   }
+// });
+
+// // Export all controller functions
+// module.exports = {
+//   createIssue,
+//   getAllIssues,
+//   getMyIssues,
+//   getNearbyIssues,
+//   getIssueById,
+//   updateIssueStatus,
+//   upvoteIssue,
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const asyncHandler = require('express-async-handler');
 const Issue = require('../models/issueModel');
 const Authority = require('../models/authorityModel'); // Ensure Authority model is imported
@@ -230,7 +441,11 @@ const Authority = require('../models/authorityModel'); // Ensure Authority model
 // @access  Private
 const createIssue = asyncHandler(async (req, res) => {
   const { title, description, category, lat, lng, address, dateTime } = req.body;
-  let imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+  
+  // --- UPDATED LINE ---
+  // The 'req.file.path' now contains the secure URL from Cloudinary
+  let imageUrl = req.file ? req.file.path : null;
+  // --- END OF UPDATE ---
 
   const longitude = parseFloat(lng);
   const latitude = parseFloat(lat);
@@ -263,7 +478,7 @@ const createIssue = asyncHandler(async (req, res) => {
     title,
     description,
     category,
-    imageUrl,
+    imageUrl, // This will now save the Cloudinary URL
     address,
     location,
     reportedBy: req.user._id,
@@ -416,3 +631,6 @@ module.exports = {
   updateIssueStatus,
   upvoteIssue,
 };
+
+
+

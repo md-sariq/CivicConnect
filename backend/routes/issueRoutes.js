@@ -233,11 +233,81 @@
 
 
 
+// const express = require('express');
+// const router = express.Router();
+// const multer = require('multer');
+// const path = require('path');
+// const { protect, authorityAdmin } = require('../middleware/authMiddleware');
+// const {
+//   createIssue,
+//   getAllIssues,
+//   getIssueById,
+//   updateIssueStatus,
+//   getNearbyIssues,
+//   upvoteIssue,
+//   getMyIssues,
+// } = require('../controllers/issueController');
+
+// // multer setup
+// const storage = multer.diskStorage({
+//   destination(req, file, cb) {
+//     // --- UPDATED LINE ---
+//     // Changed path.resolve() to path.join(process.cwd(), 'uploads')
+//     // This perfectly matches the 'express.static' path in your server.js
+//     // and ensures multer saves to 'backend/uploads'.
+//     cb(null, path.join(process.cwd(), 'uploads'));
+//   },
+//   filename(req, file, cb) {
+//     cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+//   },
+// });
+// const upload = multer({ storage });
+
+// // --- Define Routes ---
+// router.route('/')
+//   .post(protect, upload.single('image'), createIssue)
+//   .get(protect, getAllIssues);
+
+// // Specific routes must come BEFORE dynamic routes like /:id
+// router.get('/my-issues', protect, getMyIssues);
+// router.get('/nearby', protect, getNearbyIssues);
+
+// // Dynamic routes
+// router.route('/:id').get(protect, getIssueById);
+// router.route('/:id/status').put(protect, authorityAdmin, updateIssueStatus);
+// router.route('/:id/upvote').put(protect, upvoteIssue);
+
+// module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { protect, authorityAdmin } = require('../middleware/authMiddleware');
+
+// --- NEW IMPORTS for Cloudinary ---
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+// --- END OF NEW IMPORTS ---
+
 const {
   createIssue,
   getAllIssues,
@@ -248,22 +318,27 @@ const {
   getMyIssues,
 } = require('../controllers/issueController');
 
-// multer setup
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    // --- UPDATED LINE ---
-    // Changed path.resolve() to path.join(process.cwd(), 'uploads')
-    // This perfectly matches the 'express.static' path in your server.js
-    // and ensures multer saves to 'backend/uploads'.
-    cb(null, path.join(process.cwd(), 'uploads'));
-  },
-  filename(req, file, cb) {
-    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+// --- NEW: Cloudinary Configuration ---
+// This configures Cloudinary using your .env variables
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// --- UPDATED: multer setup now uses CloudinaryStorage ---
+// The old multer.diskStorage code has been removed.
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'civicconnect', // A folder name in your Cloudinary account
+    allowed_formats: ['jpeg', 'png', 'jpg'],
   },
 });
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
+// --- END OF UPDATE ---
 
-// --- Define Routes ---
+// --- Define Routes (No changes here) ---
 router.route('/')
   .post(protect, upload.single('image'), createIssue)
   .get(protect, getAllIssues);
@@ -278,3 +353,5 @@ router.route('/:id/status').put(protect, authorityAdmin, updateIssueStatus);
 router.route('/:id/upvote').put(protect, upvoteIssue);
 
 module.exports = router;
+
+
