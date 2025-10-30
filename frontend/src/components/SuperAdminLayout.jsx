@@ -55,7 +55,8 @@
 
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { FaUsersCog, FaUserPlus, FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa'; // Import footer icons
+import { FaUsersCog, FaUserPlus } from 'react-icons/fa';
+import Footer from './Footer';
 
 export default function SuperAdminLayout() {
   const navigate = useNavigate();
@@ -100,16 +101,7 @@ export default function SuperAdminLayout() {
       </div>
 
       {/* --- NEW: Footer (visible on all screen sizes) --- */}
-      <footer className="bg-white border-t">
-        <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-          <div className="flex justify-center space-x-6 mb-4">
-            <a href="#" className="hover:text-indigo-600"><FaTwitter size={20} /></a>
-            <a href="#" className="hover:text-indigo-600"><FaGithub size={20} /></a>
-            <a href="#" className="hover:text-indigo-600"><FaLinkedin size={20} /></a>
-          </div>
-          <p className="text-sm">&copy; {new Date().getFullYear()} CivicConnect. All Rights Reserved.</p>
-        </div>
-      </footer>
+      <Footer hoverColor="indigo-600" />
     </div>
   );
 }

@@ -81,7 +81,8 @@
 
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { FaHome, FaPlus, FaList, FaMapMarkedAlt, FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import { FaHome, FaPlus, FaList, FaMapMarkedAlt } from 'react-icons/fa';
+import Footer from './Footer';
 
 export default function CitizenLayout() {
   const navigate = useNavigate();
@@ -139,25 +140,16 @@ export default function CitizenLayout() {
         </main>
       </div>
       
-      {/* --- NEW: Desktop Footer --- */}
-      {/* This footer is separate from the mobile nav bar and is only visible on medium screens and up */}
-      <footer className="hidden md:block bg-white border-t">
-        <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-          <div className="flex justify-center space-x-6 mb-4">
-            <a href="#" className="hover:text-blue-600"><FaTwitter size={20} /></a>
-            <a href="#" className="hover:text-blue-600"><FaGithub size={20} /></a>
-            <a href="#" className="hover:text-blue-600"><FaLinkedin size={20} /></a>
-          </div>
-          <p className="text-sm">&copy; {new Date().getFullYear()} CivicConnect. All Rights Reserved.</p>
-        </div>
-      </footer>
+      {/* --- Footer (visible on all screen sizes) --- */}
+      <Footer />
 
       {/* --- Mobile Bottom Nav --- */}
-      <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t">
+      <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-20">
         <nav className="flex justify-around items-center h-16">
            {navItems.map(item => <NavLink key={item.to} to={item.to} className={navLinkClass}>{item.icon}<span className="text-xs">{item.text}</span></NavLink>)}
         </nav>
       </footer>
+      {/* Add spacing at bottom on mobile to account for both footer and nav */}
       <div className="md:hidden h-16"></div>
     </div>
   );
