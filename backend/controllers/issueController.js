@@ -1205,8 +1205,10 @@ const getEmbedding = async (text) => {
     console.warn('GEMINI_API_KEY not found. Skipping embedding.');
     return null;
   }
-  // We use text-embedding-004 model for generating embeddings
+  
+  // --- UPDATED: Fixed typo from https.:// to https:// ---
   const url = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`;
+  // --- END OF UPDATE ---
 
   const payload = {
     model: "models/text-embedding-004",
@@ -1303,7 +1305,9 @@ const getSummary = async (descriptions) => {
     return "Could not generate summary.";
   }
 
-  const url = `https.://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  // --- UPDATED: Fixed typo from https.:// to https:// ---
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  // --- END OF UPDATE ---
   
   const userPrompt = `Summarize the following citizen reports into a single, concise one-paragraph description of the problem. Combine the key details and ignore repetitive information.
 
